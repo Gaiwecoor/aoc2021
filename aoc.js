@@ -20,3 +20,10 @@ console.time("Complete Time");
     console.log("Part 2:", Part2(data));
   console.timeEnd("Part 2 Time");
 console.timeEnd("Complete Time");
+
+module.exports = {
+  input,
+  data,
+  Part1,
+  Part2
+}
