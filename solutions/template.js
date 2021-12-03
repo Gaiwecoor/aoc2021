@@ -1,5 +1,5 @@
 function Setup(data) {
-  return data.split("\n");
+  return data.trim().split("\n");
 }
 
 function Part1(data) {
