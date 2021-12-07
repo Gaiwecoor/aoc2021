@@ -123,6 +123,13 @@ class UMap extends Map {
     return mapped;
   }
 
+  reduce(fn, accumulator = 0) {
+    for (const [key, value] of this) {
+      accumulator = fn(accumulator, value, key, this);
+    }
+    return accumulator;
+  }
+
   some(fn) {
     for (const [key, value] of this) {
       if (fn(value, key, this)) return true;
@@ -172,6 +179,13 @@ class USet extends Set {
       mapped[i++] = fn(value, this);
     }
     return mapped;
+  }
+
+  reduce(fn, accumulator = 0) {
+    for (const value of this) {
+      accumulator = fn(accumulator, value, this);
+    }
+    return accumulator;
   }
 
   some(fn) {
