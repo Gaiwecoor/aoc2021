@@ -58,15 +58,25 @@ class Link {
 }
 
 class Point {
-  constructor(data) {
-    if (typeof data == "string") {
-      const [x, y] = data.split(",").map(n => parseInt(n, 10));
-      this.x = x;
-      this.y = y;
-    } else {
+  constructor(x, y, value) {
+    if (typeof x == "string") {
+      const [x0, y0] = x.split(",").map(n => parseInt(n, 10));
+      this.x = x0;
+      this.y = y0;
+      this.value = y;
+    } else if (typeof data == "object") {
       this.x = data.x;
       this.y = data.y;
+      this.value = data.value;
+    } else {
+      this.x = x;
+      this.y = y;
+      this.value = value;
     }
+  }
+
+  clone() {
+    return new Point(this);
   }
 
   distanceTo(point) {
@@ -76,11 +86,27 @@ class Point {
   get label() {
     return `${this.x},${this.y}`;
   }
+
+  valueOf() {
+    return this.value;
+  }
 }
 
 class UMap extends Map {
   constructor(data) {
     super(data);
+  }
+
+  clone() {
+    return new this.constructor(this);
+  }
+
+  equals(other) {
+    if (this.size !== other.size) return false;
+    for (const [key, value] of this) {
+      if (!other.has(key) || other.get(key) !== value) return false;
+    }
+    return true;
   }
 
   filter(fn) {
@@ -143,6 +169,18 @@ class USet extends Set {
     super(data);
   }
 
+  clone() {
+    return new this.constructor(this);
+  }
+
+  equals(other) {
+    if (this.size !== other.size) return false;
+    for (const item of this) {
+      if (!other.has(item)) return false;
+    }
+    return true;
+  }
+
   filter(fn) {
     const filtered = new this.constructor();
     for (const value of this) {
@@ -196,7 +234,38 @@ class USet extends Set {
   }
 }
 
+class Grid extends UMap {
+  constructor(data) {
+    super(data);
+  }
+
+  delete(x, y) {
+    if (x instanceof Point) return super.delete(x.label);
+    if (typeof x == "string") return super.delete(x);
+    return super.delete(`${x},${y}`);
+  }
+
+  get(x, y) {
+    if (x instanceof Point) return super.get(x.label);
+    if (typeof x == "string") return super.get(x);
+    return super.get(`${x},${y}`);
+  }
+
+  has(x, y) {
+    if (x instanceof Point) return super.has(x.label);
+    if (typeof x == "string") return super.has(x);
+    return super.has(`${x},${y}`);
+  }
+
+  set(x, y, value) {
+    if (x instanceof Point) return super.set(x.label, y);
+    if (typeof x == "string") return super.set(x, y);
+    return super.set(`${x},${y}`, value);
+  }
+}
+
 module.exports = {
+  Grid,
   Link,
   Point,
   UMap,
