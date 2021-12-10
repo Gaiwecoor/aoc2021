@@ -1,4 +1,5 @@
 const day = process.argv[2].padStart(2, "0");
+const alt = process.argv[3];
 const fs = require("fs");
 
 console.time("Complete Time");
@@ -8,7 +9,7 @@ console.time("Complete Time");
       Part1 = () => undefined,
       Part2 = () => undefined
     } = require(`./solutions/day${day}`);
-    const input = fs.readFileSync(`./inputs/input${day}.txt`, "utf8");
+    const input = fs.readFileSync(`./inputs/input${day}${alt ?? ""}.txt`, "utf8");
     const data = Setup(input);
   console.timeEnd("Setup Time");
 
