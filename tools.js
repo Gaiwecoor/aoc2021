@@ -264,10 +264,35 @@ class Grid extends UMap {
   }
 }
 
+class Tree {
+  constructor(value) {
+    this.after = new USet();
+    this.before = new USet();
+    this.value = value;
+  }
+
+  addChild(node) {
+    node.parents.add(this);
+    this.children.add(node);
+    return this;
+  }
+
+  addParent(node) {
+    node.children.add(this);
+    this.parents.add(node);
+    return this;
+  }
+
+  valueOf() {
+    return this.value;
+  }
+}
+
 module.exports = {
   Grid,
   Link,
   Point,
   UMap,
   USet,
+  Tree,
 };
