@@ -1,62 +1,64 @@
-const {Link} = require("../tools");
-
-class Polymer extends Link {
-  constructor(data) {
-    super(data);
-  }
-
-  sub(n = 2) {
-    let string = "";
-    let current = this;
-    for (let i = 0; i < n; i++) {
-      string += current;
-      if (!(current = current.next())) break;
-    }
-    return string;
-  }
-
-  get total() {
-    const count = new Map();
-    let polymer = this.first;
-    do {
-      if (!count.has(polymer.value)) count.set(polymer.value, 1);
-      else count.set(polymer.value, count.get(polymer.value) + 1);
-    } while (polymer = polymer.after);
-    const polymers = Array.from(count.entries()).sort((a, b) => a[1] - b[1]);
-    return {high: polymers[polymers.length - 1][1], low: polymers[0][1]};
-  }
-}
+const {UMap} = require("../tools");
 
 function Setup(data) {
   let [polymer, transforms] = data.trim().split("\n\n");
 
-  const first = new Polymer(polymer[0]);
-  let current = first;
-  for (let i = 1; i < polymer.length; i++) {
-    current = current.addAfter(polymer[i]);
-  }
+  const counts = {};
+  const pairs = {};
 
-  transforms = new Map(transforms.split("\n").map(t => t.split(" -> ")));
+  for (let i = 0; i < polymer.length; i++) {
+    if (!counts[polymer[i]]) counts[polymer[i]] = 1;
+    else counts[polymer[i]]++;
 
-  return {polymer: first, transforms};
-}
-
-function Part1(data, n = 10) {
-  const {transforms} = data;
-  for (let i = 0; i < n; i++) {
-    let polymer = data.polymer.last;
-    while (polymer = polymer.before) {
-      if (transforms.has(polymer.sub())) polymer.addAfter(transforms.get(polymer.sub()));
+    if (i < (polymer.length - 1)) {
+      const pair = polymer[i] + polymer[i + 1];
+      if (!pairs[pair]) pairs[pair] = 1;
+      else pairs[pair]++;
     }
   }
 
-  const {high, low} = data.polymer.total;
-  return high - low;
+  transforms = new UMap(transforms.split("\n").map(t => {
+    const [input, insert] = t.split(" -> ");
+    return [input, {insert, increment: [input[0] + insert, insert + input[1]]}];
+  }));
+
+  return {counts, pairs, transforms};
+}
+
+function clone(object) {
+  const cln = {};
+  for (const key of Object.keys(object)) cln[key] = object[key];
+  return cln;
+}
+
+function Part1({counts, pairs, transforms}, n = 10) {
+  counts = clone(counts);
+
+  for (let i = 0; i < n; i++) {
+    const result = clone(pairs);
+
+    for (const [input, {insert, increment}] of transforms) {
+      if (pairs[input] > 0) {
+
+        if (!counts[insert]) counts[insert] = pairs[input];
+        else counts[insert] += pairs[input];
+
+        for (const inc of increment) {
+          if (!result[inc]) result[inc] = pairs[input];
+          else result[inc] += pairs[input];
+        }
+        result[input] -= pairs[input];
+
+      }
+    }
+    pairs = result;
+  }
+
+  return Math.max(...Object.values(counts)) - Math.min(...Object.values(counts));
 }
 
 function Part2(data) {
-  // Don't do this. It gets big.
-  return Part1(data, 30);
+  return Part1(data, 40);
 }
 
 module.exports = { Part1, Part2, Setup };
